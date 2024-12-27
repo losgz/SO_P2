@@ -143,7 +143,6 @@ static void arrive() {
         exit(EXIT_FAILURE);
     }
 
-    // changing the state to Arriving
     sh->fSt.st.refereeStat = ARRIVING;
     saveState(nFic, &sh->fSt);
 
@@ -168,7 +167,6 @@ static void waitForTeams() {
         exit(EXIT_FAILURE);
     }
 
-    // changing the state to waiting for teams
     sh->fSt.st.refereeStat = WAITING_TEAMS;
     saveState(nFic, &sh->fSt);
 
@@ -177,7 +175,6 @@ static void waitForTeams() {
         exit(EXIT_FAILURE);
     }
 
-    // waiting for both teams to be formed
     for (int i = 0; i < 2; i++) {
         if (semDown(semgid, sh->refereeWaitTeams) == -1) {
             perror("error on the up operation for semaphore access ()");
@@ -199,7 +196,6 @@ static void startGame() {
         exit(EXIT_FAILURE);
     }
 
-    // change the state to starting the game
     sh->fSt.st.refereeStat = STARTING_GAME;
     saveState(nFic, &sh->fSt);
 
@@ -208,15 +204,12 @@ static void startGame() {
         exit(EXIT_FAILURE);
     }
 
-    // waiting for every player and goalie to start the game
     for (int i = 0; i < 2 * (NUMTEAMPLAYERS + NUMTEAMGOALIES); i++) {
         if (semUp(semgid, sh->playersWaitReferee) == -1) {
             perror("error on the down operation for semaphore access (RF)");
             exit(EXIT_FAILURE);
         }
-    }
 
-    for (int i = 0; i < 2 * (NUMTEAMPLAYERS + NUMTEAMGOALIES); i++) {
         if (semDown(semgid, sh->playing) == -1) {
             perror("error on the up operation for semaphore access (RF)");
             exit(EXIT_FAILURE);
@@ -237,7 +230,6 @@ static void play() {
         exit(EXIT_FAILURE);
     }
 
-    // change the state to refereeing
     sh->fSt.st.refereeStat = REFEREEING;
     saveState(nFic, &sh->fSt);
 
@@ -262,7 +254,6 @@ static void endGame() {
         exit(EXIT_FAILURE);
     }
 
-    // change the state to ending game
     sh->fSt.st.refereeStat = ENDING_GAME;
     saveState(nFic, &sh->fSt);
 
@@ -271,7 +262,6 @@ static void endGame() {
         exit(EXIT_FAILURE);
     }
 
-    // waiting for all players to end the game
     for (int i = 0; i < 2 * (NUMTEAMGOALIES + NUMTEAMPLAYERS); i++) {
         if (semUp(semgid, sh->playersWaitEnd) == -1) {
             perror("error on the down operation for semaphore access (RF)");

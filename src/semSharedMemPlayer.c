@@ -143,7 +143,7 @@ static void arrive(int id) {
         exit(EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
+    // Update the state of the player to Arriving
     sh->fSt.st.playerStat[id] = ARRIVING;
     saveState(nFic, &sh->fSt);
 
@@ -178,7 +178,7 @@ static int playerConstituteTeam(int id) {
         exit(EXIT_FAILURE);
     }
 
-    // the player arrived and is free
+    // the player was added to the number of players that arrived and free
     sh->fSt.playersFree++;
     sh->fSt.playersArrived++;
 
@@ -195,9 +195,9 @@ static int playerConstituteTeam(int id) {
         } else { // there are enough elements to form a team
 
             sh->fSt.st.playerStat[id] = FORMING_TEAM;
-            sh->fSt.playersFree--; // the player isn't free
+            sh->fSt.playersFree--; // remove the player from the free players
 
-            // registrate the team players
+            // registrate the team players that were waiting
             for (int i = 0; i < NUMTEAMPLAYERS - 1; i++) {
                 if (semUp(semgid, sh->playersWaitTeam) == -1) {
                     perror("error on the down operation for semaphore access "
@@ -211,10 +211,10 @@ static int playerConstituteTeam(int id) {
                     exit(EXIT_FAILURE);
                 }
 
-                sh->fSt.playersFree--;
+                sh->fSt.playersFree--; // remove the players from the free players
             }
 
-            // registrate team goalie
+            // registrate team goalie that was waiting
             if (semUp(semgid, sh->goaliesWaitTeam) == -1) {
                 perror("error on the down operation for semaphore access (PL)");
                 exit(EXIT_FAILURE);
@@ -225,16 +225,17 @@ static int playerConstituteTeam(int id) {
                 exit(EXIT_FAILURE);
             }
 
-            sh->fSt.goaliesFree--;
+            sh->fSt.goaliesFree--; // remove the goalie from the free goalies
 
             ret = sh->fSt.teamId++;
             saveState(nFic, &sh->fSt);
         }
 
-    } else {
+    } else { // there isn't space in any team
 
-        ret = 0;
-        sh->fSt.st.playerStat[id] = LATE;
+        ret = 0; // the player isn't in a team
+
+        sh->fSt.st.playerStat[id] = LATE; 
         saveState(nFic, &sh->fSt);
 
         if (semUp(semgid, sh->playersWaitEnd) == -1) {
@@ -249,7 +250,6 @@ static int playerConstituteTeam(int id) {
         exit(EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
 
     if (sh->fSt.st.playerStat[id] == FORMING_TEAM) {
         if (semUp(semgid, sh->refereeWaitTeams) == -1) {
@@ -290,7 +290,6 @@ static void waitReferee(int id, int team) {
         exit(EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
     if (team == 1) {
         sh->fSt.st.playerStat[id] = WAITING_START_1;
     } else if (team == 2) {
@@ -307,7 +306,6 @@ static void waitReferee(int id, int team) {
         exit(EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
 
     if (semDown(semgid, sh->playersWaitReferee) == -1) {
         perror("error on the down operation for semaphore access(PL)");
@@ -333,7 +331,6 @@ static void playUntilEnd(int id, int team) {
     }
 
 
-    // if the 
     if (team == 1) {
         sh->fSt.st.playerStat[id] = PLAYING_1;
     } else if (team == 2) {
@@ -350,7 +347,6 @@ static void playUntilEnd(int id, int team) {
         exit(EXIT_FAILURE);
     }
 
-    // Allow the playing
     if (semUp(semgid, sh->playing) == -1) {
         perror("error on the up operation for semaphore access(PL)");
         exit(EXIT_FAILURE);
