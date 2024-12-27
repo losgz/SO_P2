@@ -141,8 +141,7 @@ static void arrive(int id)
         perror ("error on the up operation for semaphore access (GL)");
         exit (EXIT_FAILURE);
     }
-
-    /* TODO: insert your code here */
+    //Update state of goalie to arriving
     sh->fSt.st.goalieStat[id] = ARRIVING;
     saveState(nFic, &sh->fSt);
 
@@ -178,8 +177,7 @@ static int goalieConstituteTeam (int id)
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
-    
+    // the player was added to the number of players that arrived and free
     sh->fSt.goaliesFree++;
     sh->fSt.goaliesArrived++;
 
@@ -201,16 +199,16 @@ static int goalieConstituteTeam (int id)
                     exit(EXIT_FAILURE);
                 }
             }
-
+            // Update the number of free players, after team forming
             sh->fSt.playersFree = sh->fSt.playersFree - 4;
-            ret = sh->fSt.teamId++;
+            ret = sh->fSt.teamId++; // set the team id of current iteration
             saveState(nFic, &sh->fSt);
         } else {
-            sh->fSt.st.goalieStat[id] = WAITING_TEAM;
+            sh->fSt.st.goalieStat[id] = WAITING_TEAM; // If goalie can´t create team, it's state is set to waiting for a team
             saveState(nFic, &sh->fSt);
         }
     } else {
-        sh->fSt.st.goalieStat[id] = LATE;
+        sh->fSt.st.goalieStat[id] = LATE; // Goalie state set to late, as it arrived after max number of goalies arrived
         saveState(nFic, &sh->fSt);
     }
 
@@ -259,8 +257,7 @@ static void waitReferee (int id, int team)
         perror ("error on the up operation for semaphore access (GL)");
         exit (EXIT_FAILURE);
     }
-
-    /* TODO: insert your code here */
+    // depending on the goalies's team, it's state is set to waiting for the game to start, followed by it's team id
     if (team == 1) {
         sh->fSt.st.goalieStat[id] = WAITING_START_1;
     } else if (team == 2) {
@@ -276,7 +273,6 @@ static void waitReferee (int id, int team)
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
     if (semDown(semgid, sh->playersWaitReferee) == -1) {
         perror("error on the down operation for semaphore access(GL)");
         exit(EXIT_FAILURE);
@@ -298,8 +294,7 @@ static void playUntilEnd (int id, int team)
         perror ("error on the up operation for semaphore access (GL)");
         exit (EXIT_FAILURE);
     }
-
-    /* TODO: insert your code here */
+    // depending on team id, goalie's state is set to playing, followed by it's team id
     if (team == 1) {
         sh->fSt.st.goalieStat[id] = PLAYING_1;
     } else if (team == 2) {
@@ -315,7 +310,6 @@ static void playUntilEnd (int id, int team)
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
         // Allow the playing
     if (semUp(semgid, sh->playing) == -1) {
         perror("error on the up operation for semaphore access(GL)");
